@@ -5,7 +5,6 @@ services:
     build:
       context: .
     environment:
-#      - BOT_TOKEN=your_token_here
-      - BOT_TOKEN=
+      - BOT_TOKEN=${BOT_TOKEN}
     container_name: telegram-bot
     restart: unless-stopped
