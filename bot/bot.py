@@ -1,4 +1,8 @@
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from db import create_session_factory
 from .controllers import controllers
+
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, InlineQueryHandler
 
 
@@ -8,6 +12,7 @@ class TRGBot:
 
     def start_bot(self) -> None:
         app = Application.builder().token(self.token).build()
+        app.session_factory = create_session_factory()
 
         TRGBot.register_controllers(app)
 
