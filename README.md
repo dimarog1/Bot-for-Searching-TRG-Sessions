@@ -2,15 +2,39 @@
 
 ## Запуск
 
+### Poetry
+
 ```bash
-./run.sh
+poetry install
 ```
 
-Если не работает, то попробуй это `chmod +x run.sh`.
+```bash
+poetry shell
+```
 
-Если не помогло, то запусти вручную `docker compose up --build --remove-orphans`
+### .env файл
 
-Также нужно создать .env файл и положить туда токен бота в формате `BOT_TOKEN=qwerty123`
+```bash
+make env
+```
+
+Далее запишите в него токен бота
+
+### База данных
+
+```bash
+make db
+```
+
+```bash
+make migrate head
+```
+
+### Запуск бота
+
+```bash
+make run
+```
 
 ## Руководство разработчику
 
