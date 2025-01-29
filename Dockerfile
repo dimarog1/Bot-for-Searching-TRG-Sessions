@@ -10,8 +10,10 @@ COPY requirements.txt /app/
 # Устанавливаем зависимости
 RUN pip install --no-cache-dir -r requirements.txt
 
+RUN make migrate head
+
 # Копируем весь код проекта в контейнер
 COPY . /app/
 
-# Команда для запуска бота
+# Команда для запуска миграций
 CMD ["python", "main.py"]

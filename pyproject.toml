@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "bot-for-searching-trg-sessions"
+version = "0.1.0"
+description = "Bot for searching trg sessions"
+authors = ["dimarog1 <dima.rogatnev@yandex.ru>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+python-telegram-bot = "20.0"
+asyncpg = "~0.30.0"
+SQLAlchemy = "~2.0.37"
+pydantic-settings = "~2.7.1"
+python-dotenv = "~1.0.1"
+alembic = "~1.14.1"
+psycopg2-binary = "^2.9.9"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,9 +1,7 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from db import create_session_factory
-from .controllers import controllers
-
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, InlineQueryHandler
+
+from bot.config import get_settings
+from .controllers import controllers
 
 
 class TRGBot:
@@ -12,7 +10,6 @@ class TRGBot:
 
     def start_bot(self) -> None:
         app = Application.builder().token(self.token).build()
-        app.session_factory = create_session_factory()
 
         TRGBot.register_controllers(app)
 
@@ -44,3 +41,9 @@ class TRGBot:
 
                         elif method_name.startswith("err_"):
                             print(f"Обработчик ошибок {method_name} зарегистрирован, но не добавлен автоматически.")
+
+
+if __name__ == '__main__':
+    settings = get_settings()
+    trg_bot = TRGBot(settings.BOT_TOKEN)
+    trg_bot.start_bot()
