@@ -1,28 +1,29 @@
-from sqlalchemy import Column, Integer, String, Sequence, func
-from sqlalchemy.dialects.postgresql import BOOLEAN, INTEGER, TEXT, TIMESTAMP, UUID
+from sqlalchemy import Column, Integer, String, Boolean, Float, TIMESTAMP, Sequence
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
-from bot.db import DeclarativeBase
+Base = declarative_base()
 
 
-class User(DeclarativeBase):
-    __tablename__ = 'users'
+class User(Base):
+    __tablename__ = 'Users'
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        server_default=func.gen_random_uuid(),
-        unique=True,
-        doc="Unique id of the string in table",
-    )
-    name = Column(
-        String(50),
-        nullable=False
-    )
-    age = Column(
-        Integer,
-        nullable=False
-    )
+    id_ = Column(Integer, Sequence('user_id_seq'), primary_key=True, nullable=False)
+    name = Column(String(50), nullable=False)
+    tg_id = Column(String(50), nullable=False)
+    is_admin = Column(Boolean, default=False)
+    country = Column(String(50), nullable=False)
+    city = Column(String(50), nullable=False)
+    rating = Column(Float, default=0.0)
+    created_at = Column(TIMESTAMP, nullable=False)
+    updated_at = Column(TIMESTAMP, nullable=True)
+
+    logs = relationship('Log', back_populates='user')
+    reviews = relationship('Review', back_populates='user')
+    sessions = relationship('Session', back_populates='master')
+    session_players = relationship('SessionPlayer', back_populates='user')
+    recomendations = relationship('Recomendation', back_populates='user')
+    user_genres = relationship('UserGenre', back_populates='user')
 
     def __repr__(self):
-        columns = {column.name: getattr(self, column.name) for column in self.__table__.columns}
-        return f'<{self.__tablename__}: {", ".join(map(lambda x: f"{x[0]}={x[1]}", columns.items()))}>'
+        return f"User(id={self.id_}, name='{self.name}'"
