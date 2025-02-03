@@ -13,7 +13,7 @@ class SessionPlayer(Base):
     user_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
 
     user = relationship('User', back_populates='session_players')
-
+    session = relationship('Session', back_populates='session_players')
 
     def __repr__(self):
         return f"Session(id_={self.id_}, game_id='{self.game_id}' , master_id='{self.master_id}'"

@@ -24,6 +24,10 @@ class Session(Base):
 
     reviews = relationship('Review', back_populates='session')
     session_players = relationship('SessionPlayer', back_populates='session')
+    recomendations = relationship('Recomendation', back_populates='session')
+
+    game = relationship('Game', back_populates='sessions')
+    master = relationship('User', back_populates='sessions')
 
     def __repr__(self):
         return f"Session(id_={self.id_}, game_id='{self.game_id}' , master_id='{self.master_id}'"
