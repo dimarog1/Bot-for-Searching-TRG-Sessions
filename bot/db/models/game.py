@@ -1,19 +1,18 @@
 from sqlalchemy import Column, Integer, String, Sequence, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from bot.db import DeclarativeBase
 
 
-class Game(Base):
+class Game(DeclarativeBase):
     __tablename__ = 'Games'
 
-    id_ = Column(Integer, Sequence('game_id_seq'), primary_key=True, nullable=False)
+    id_ = Column(Integer, ForeignKey('Games.id_'), autoincrement=True, primary_key=True, nullable=False)
     name = Column(String(50), nullable=False)
     genre_id = Column(Integer, ForeignKey('Genres.id_'), nullable=False)
 
     sessions = relationship('Session', back_populates='game')
-    recomendations = relationship('Recommendation', back_populates='game')
+    recommendations = relationship('Recommendation', back_populates='game')
 
     genre = relationship('Genre', back_populates='games')
 

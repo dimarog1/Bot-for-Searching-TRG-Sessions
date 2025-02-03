@@ -1,7 +1,6 @@
-from bot.db.connection.session import SessionManager, get_session
+from bot.db.connection.session import SessionManager
 
 
 __all__ = [
-    "get_session",
     "SessionManager",
 ]

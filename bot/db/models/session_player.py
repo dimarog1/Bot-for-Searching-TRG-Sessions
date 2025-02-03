@@ -1,14 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Sequence, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, Sequence, ForeignKey
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from bot.db import DeclarativeBase
 
 
-class SessionPlayer(Base):
+class SessionPlayer(DeclarativeBase):
     __tablename__ = 'SessionPlayers'
 
-    id_ = Column(Integer, Sequence('session_player_id_seq'), primary_key=True, nullable=False)
+    id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     session_id = Column(Integer, ForeignKey('Sessions.id_'), nullable=False)
     user_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
 

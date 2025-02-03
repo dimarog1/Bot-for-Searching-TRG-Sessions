@@ -1,14 +1,13 @@
 from sqlalchemy import Column, Integer, Sequence, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from bot.db import DeclarativeBase
 
 
-class UserGenre(Base):
+class UserGenre(DeclarativeBase):
     __tablename__ = 'UserGenres'
     
-    id_ = Column(Integer, Sequence('user_genre_id_seq'), primary_key=True, nullable=False)
+    id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     user_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
     genre_id = Column(Integer, ForeignKey('Genres.id_'), nullable=False)
 
