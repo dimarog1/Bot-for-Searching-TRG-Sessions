@@ -13,6 +13,7 @@ class UserGenre(Base):
     genre_id = Column(Integer, ForeignKey('Genres.id_'), nullable=False)
 
     user = relationship('User', back_populates='user_genres')
+    genre = relationship('Genre', back_populates='user_genres')
 
     def __repr__(self):
         return f"UserGenre(user_id={self.user_id}, genre_id='{self.genre_id}'"
