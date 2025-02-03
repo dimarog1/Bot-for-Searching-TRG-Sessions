@@ -14,7 +14,7 @@ class TRGBot:
         TRGBot.register_controllers(app)
 
         print("Бот запущен...")
-        app.run_polling()
+        #app.run_polling()
 
     @staticmethod
     def register_controllers(app: Application):
