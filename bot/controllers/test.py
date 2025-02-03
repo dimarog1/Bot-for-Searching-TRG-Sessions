@@ -2,7 +2,7 @@ from sqlalchemy import select, func
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from bot.db.connection import get_session
+from bot.db.connection import SessionManager
 from bot.db.models import User
 
 
@@ -19,24 +19,29 @@ class TestController:
     @staticmethod
     async def cmd_check_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = select(func.now())
-        async for session in get_session():
+        async with SessionManager.get_session() as session:
             result = await session.execute(query)
             message = result.scalar_one()
             await update.message.reply_text(message)
 
     @staticmethod
     async def cmd_add_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        new_user = User(name="aboba", age=20)
-        async for session in get_session():
+        new_user = User(
+            name="abobik",
+            tg_id="123",
+            country="Abobia",
+            city="Zhopa",
+            rating=1.5
+        )
+        async with SessionManager.get_session() as session:
             session.add(new_user)
-            await session.commit()
-            await session.refresh(new_user)  # Обновляет объект после сохранения
-            await update.message.reply_text(new_user.__repr__())
+
+        await update.message.reply_text(new_user.__repr__())
 
     @staticmethod
     async def cmd_get_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        query = select(User)
-        async for session in get_session():
+        query = select(User).where(User.id_ == 1)
+        async with SessionManager.get_session() as session:
             result = await session.execute(query)
             message = result.scalar_one()
-            await update.message.reply_text(str(message))
+        await update.message.reply_text(str(message))

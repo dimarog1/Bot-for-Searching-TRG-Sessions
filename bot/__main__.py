@@ -1,7 +1,7 @@
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler, InlineQueryHandler
 
 from bot.config import get_settings
-from .controllers import controllers
+from bot.controllers import controllers
 
 
 class TRGBot:
@@ -14,7 +14,7 @@ class TRGBot:
         TRGBot.register_controllers(app)
 
         print("Бот запущен...")
-        #app.run_polling()
+        app.run_polling()
 
     @staticmethod
     def register_controllers(app: Application):

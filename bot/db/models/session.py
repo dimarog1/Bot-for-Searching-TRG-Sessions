@@ -1,14 +1,13 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, Sequence, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from bot.db import DeclarativeBase
 
 
-class Session(Base):
+class Session(DeclarativeBase):
     __tablename__ = 'Sessions'
 
-    id_ = Column(Integer, Sequence('session_id_seq'), primary_key=True, nullable=False)
+    id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     game_id = Column(Integer, ForeignKey('Games.id_'), nullable=False)
     master_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
     country = Column(String(50), nullable=False)
@@ -24,7 +23,7 @@ class Session(Base):
 
     reviews = relationship('Review', back_populates='session')
     session_players = relationship('SessionPlayer', back_populates='session')
-    recomendations = relationship('Recomendation', back_populates='session')
+    recommendations = relationship('Recommendation', back_populates='session')
 
     game = relationship('Game', back_populates='sessions')
     master = relationship('User', back_populates='sessions')
