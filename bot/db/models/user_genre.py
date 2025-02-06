@@ -15,4 +15,4 @@ class UserGenre(DeclarativeBase):
     genre = relationship('Genre', back_populates='user_genres')
 
     def __repr__(self):
-        return f"UserGenre(user_id={self.user_id}, genre_id='{self.genre_id}'"
+        return f"UserGenre(id={self.id_}, user_id={self.user_id}, genre_id='{self.genre_id}')"

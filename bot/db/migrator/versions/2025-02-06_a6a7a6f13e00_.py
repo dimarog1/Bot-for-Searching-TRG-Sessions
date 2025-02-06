@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 7534a9361ad6
+Revision ID: a6a7a6f13e00
 Revises: 
-Create Date: 2025-02-04 00:48:38.799855
+Create Date: 2025-02-06 22:17:09.271364
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7534a9361ad6'
+revision: str = 'a6a7a6f13e00'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -98,6 +98,7 @@ def upgrade() -> None:
     sa.Column('comment', sa.String(length=500), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('review_type', sa.Enum('PLAYER', 'MASTER', name='statusenum'), nullable=False),
     sa.ForeignKeyConstraint(['session_id'], ['Sessions.id_'], name=op.f('fk__Reviews__session_id__Sessions')),
     sa.ForeignKeyConstraint(['user_id'], ['Users.id_'], name=op.f('fk__Reviews__user_id__Users')),
     sa.PrimaryKeyConstraint('id_', name=op.f('pk__Reviews'))

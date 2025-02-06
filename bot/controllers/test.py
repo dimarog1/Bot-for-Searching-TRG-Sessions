@@ -18,30 +18,39 @@ class TestController:
 
     @staticmethod
     async def cmd_check_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        query = select(func.now())
-        async with SessionManager.get_session() as session:
-            result = await session.execute(query)
-            message = result.scalar_one()
-            await update.message.reply_text(message)
+        try:
+            query = select(func.now())
+            async with SessionManager.get_session() as session:
+                result = await session.execute(query)
+                message = result.scalar_one()
+                await update.message.reply_text(message)
+        except Exception as e:
+            print(e)
 
     @staticmethod
     async def cmd_add_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        new_user = User(
-            name="abobik",
-            tg_id="123",
-            country="Abobia",
-            city="Zhopa",
-            rating=1.5
-        )
-        async with SessionManager.get_session() as session:
-            session.add(new_user)
+        try:
+            new_user = User(
+                name="abobik",
+                tg_id="123",
+                country="Abobia",
+                city="Zhopa",
+                rating=1.5
+            )
+            async with SessionManager.get_session() as session:
+                session.add(new_user)
 
-        await update.message.reply_text(new_user.__repr__())
+            await update.message.reply_text(new_user.__repr__())
+        except Exception as e:
+            print(e)
 
     @staticmethod
     async def cmd_get_user(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        query = select(User).where(User.id_ == 1)
-        async with SessionManager.get_session() as session:
-            result = await session.execute(query)
-            message = result.scalar_one()
-        await update.message.reply_text(str(message))
+        try:
+            query = select(User).where(User.id_ == 1)
+            async with SessionManager.get_session() as session:
+                result = await session.execute(query)
+                message = result.scalar_one()
+            await update.message.reply_text(str(message))
+        except Exception as e:
+            print(e)

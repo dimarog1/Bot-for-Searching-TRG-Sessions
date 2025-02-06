@@ -17,4 +17,4 @@ class Recommendation(DeclarativeBase):
     session = relationship('Session', back_populates='recommendations')
 
     def __repr__(self):
-        return f"Recommendation(id_={self.user_id}, user_id='{self.genre_id}'"
+        return f"Recommendation(id={self.id_}, user_id={self.user_id}, game_id={self.game_id}, session_id={self.session_id})"

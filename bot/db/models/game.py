@@ -17,4 +17,4 @@ class Game(DeclarativeBase):
     genre = relationship('Genre', back_populates='games')
 
     def __repr__(self):
-        return f"Game(user_id={self.id_}, genre_id='{self.name}'"
+        return f"Game(id={self.id_}, name={self.name}, genre_id={self.genre_id})"
