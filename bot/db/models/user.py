@@ -9,7 +9,7 @@ class User(DeclarativeBase):
 
     id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     name = Column(String(50), nullable=False)
-    tg_id = Column(String(50), nullable=False)
+    tg_id = Column(Integer, nullable=False)
     is_admin = Column(Boolean, default=False)
     country = Column(String(50), nullable=False)
     city = Column(String(50), nullable=False)
