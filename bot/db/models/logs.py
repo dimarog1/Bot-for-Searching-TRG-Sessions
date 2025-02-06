@@ -16,4 +16,4 @@ class Log(DeclarativeBase):
     user = relationship('User', back_populates='logs')
 
     def __repr__(self):
-        return f"Genre(id={self.id_}, name='{self.name}'"
+        return f"Log(id={self.id_}, action={self.action})"

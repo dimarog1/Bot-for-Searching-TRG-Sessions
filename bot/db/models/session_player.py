@@ -15,4 +15,4 @@ class SessionPlayer(DeclarativeBase):
     session = relationship('Session', back_populates='session_players')
 
     def __repr__(self):
-        return f"Session(id_={self.id_}, game_id='{self.game_id}' , master_id='{self.master_id}'"
+        return f"Session(id={self.id_}, session_id={self.session_id}, user_id={self.user_id})"
