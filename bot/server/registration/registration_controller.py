@@ -55,7 +55,7 @@ class RegistrationController:
         tg_id = update.message.from_user.id
         self.users_data[tg_id].name = update.message.text
 
-        keyboard = [
+        keyboard = [ # TODO: тут хуйня
             list(map(lambda k: k.value, CountryCodes))
         ]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
@@ -87,7 +87,7 @@ class RegistrationController:
 
         await self.register_user(tg_id)
 
-        await update.message.reply_text("Вы успешно зарегистрированы!")
+        await update.message.reply_text("Вы успешно зарегестрированы!")
 
         self.clear_user_data(tg_id)
 
