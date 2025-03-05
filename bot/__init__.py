@@ -1,19 +1,18 @@
-"""
-BOT
-"""
+from telegram.ext import Application
 
-__authors__ = "Dmitrii Rogatnev, Anton Muravev"
-__maintainer__ = __authors__
-
-__email__ = "dima.rogatnev@yandex.ru"
-__license__ = "MIT"
-__version__ = "0.0.1"
+from bot.server import init_handlers
+from bot.config import get_settings
 
 
-__all__ = (
-    "__authors__",
-    "__email__",
-    "__license__",
-    "__maintainer__",
-    "__version__",
-)
+class TRGBot:
+    def __init__(self, token: str):
+        self.token = token
+
+    def build_bot(self):
+        app = Application.builder().token(self.token).build()
+        return app
+
+    @staticmethod
+    def start_bot(app: Application) -> None:
+        print("Бот запущен...")
+        app.run_polling()
