@@ -2,8 +2,12 @@ from dataclasses import dataclass
 import enum
 import traceback
 
-from telegram import Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
+
+from bot.utils import geo_utils
+from bot.enums.country_codes import CountryCodes
+from bot.exceptions.registration_exceptions import UserAlreadyExistsException
 
 from .registration_service import RegistrationService
 
@@ -36,17 +40,27 @@ class RegistrationController:
 
     async def start_register(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
+        
+        if await RegistrationService.is_registered(tg_id):
+            await update.message.reply_text("Вы уже зарегистрированы.")
+            return ConversationHandler.END
+
         self.users_data[tg_id] = InputUserData(tg_id=tg_id)
         
-        await update.message.reply_text("Пожалуйста, введите Ваше имя:")
+        await update.message.reply_text("Укажите Ваше имя:")
         
         return StatesEnum.NAME.value
 
     async def input_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
         self.users_data[tg_id].name = update.message.text
+
+        keyboard = [
+            list(map(lambda k: k.value, CountryCodes))
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True)
         
-        await update.message.reply_text("Теперь введите Вашу страну:")
+        await update.message.reply_text("Выберите страну из списка:", reply_markup=reply_markup)
         
         return StatesEnum.COUNTRY.value
 
@@ -54,17 +68,26 @@ class RegistrationController:
         tg_id = update.message.from_user.id
         self.users_data[tg_id].country = update.message.text
 
-        await update.message.reply_text("Теперь введите Ваш город:")
+        if update.message.text not in CountryCodes:
+            return await self.input_name(update, context)
+
+        await update.message.reply_text("Укажите Ваш город:")
 
         return StatesEnum.CITY.value
 
     async def input_city(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
-        self.users_data[tg_id].city = update.message.text
+
+        value_to_key = {country_code.value: country_code.name for country_code in CountryCodes}
+        if not geo_utils.get_location(value_to_key[self.users_data[tg_id].country], update.message.text):
+            await update.message.reply_text("Такого города не существует. Попробуйте еще раз.")
+            return await self.input_country(update, context)
+
+        self.users_data[tg_id].city = update.message.text.capitalize()
 
         await self.register_user(tg_id)
 
-        await update.message.reply_text("Теперь Вы зарегистрированы!")
+        await update.message.reply_text("Вы успешно зарегистрированы!")
 
         self.clear_user_data(tg_id)
 

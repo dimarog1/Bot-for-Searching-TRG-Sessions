@@ -1,0 +1,14 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 6432,
+            "driver": "PostgreSQL",
+            "database": "bot_db",
+            "username": "user",
+            "password": "hackme",
+            "name": "main"
+        }
+    ]
+}

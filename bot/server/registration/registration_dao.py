@@ -1,4 +1,4 @@
-from sqlalchemy import exists, select
+from sqlalchemy import exists, select, text
 
 from bot.db.models import User
 
@@ -17,9 +17,11 @@ class RegistrationDao:
 
     @staticmethod
     async def get_user_by_tg_id(tg_id: int):
-        query = select(exists().where(User.tg_id == tg_id))
+        query = text("""SELECT EXISTS(SELECT 1 
+                                      FROM "Users"
+                                      WHERE tg_id = :tg_id)""")
 
         async with SessionManager.get_session() as session:
-            result = (await session.execute(query)).scalar()
+            result = (await session.execute(query, {"tg_id": tg_id})).scalar()
 
         return result
