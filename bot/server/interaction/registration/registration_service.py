@@ -1,14 +1,12 @@
 from bot.db.models import User
 
-from bot.exceptions.registration_exceptions import UserAlreadyExistsException
-
-from .registration_dao import RegistrationDao
+from bot.server.common_dao.user_dao import UserDao
 
 
 class RegistrationService:
     @staticmethod
     async def is_registered(tg_id: int) -> bool:
-        return await RegistrationDao.get_user_by_tg_id(tg_id)
+        return await UserDao.get_user_by_tg_id(tg_id) is not None
 
     @staticmethod
     async def register_user(
@@ -19,4 +17,4 @@ class RegistrationService:
     ) -> User:
         user = User(tg_id=tg_id, name=name, country=country, city=city)
 
-        return await RegistrationDao.write_user_to_db(user)
+        return await UserDao.write_user_to_db(user)

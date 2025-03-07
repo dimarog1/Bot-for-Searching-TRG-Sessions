@@ -1,4 +1,3 @@
-from bot.db.models.game import Game
 from bot.db.models.genre import Genre
 from bot.db.models.logs import Log
 from bot.db.models.recommendation import Recommendation
@@ -10,7 +9,6 @@ from bot.db.models.user_genre import UserGenre
 
 
 __all__ = [
-    "Game",
     "Genre",
     "Log",
     "Recommendation",
