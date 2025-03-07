@@ -1,11 +1,11 @@
-from sqlalchemy import exists, select
+from sqlalchemy import exists, select, text
 
 from bot.db.models import User
 
 from bot.db.connection import SessionManager
 
 
-class RegistrationDao:
+class UserDao:
 
     @staticmethod
     async def write_user_to_db(user: User) -> User:
@@ -16,10 +16,12 @@ class RegistrationDao:
         return user
 
     @staticmethod
-    async def get_user_by_tg_id(tg_id: int):
-        query = select(exists().where(User.tg_id == tg_id))
+    async def get_user_by_tg_id(tg_id: int) -> User | None:
+        query = text("""SELECT * 
+                        FROM "Users"
+                        WHERE tg_id = :tg_id""")
 
         async with SessionManager.get_session() as session:
-            result = (await session.execute(query)).scalar()
+            user = (await session.execute(query, {"tg_id": tg_id})).first()
 
-        return result
+        return user
