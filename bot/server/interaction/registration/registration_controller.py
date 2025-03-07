@@ -6,6 +6,7 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from .registration_service import RegistrationService
+from bot.server.interaction.menu.menu_controller import MenuController
 
 
 @dataclass
@@ -16,7 +17,7 @@ class InputUserData:
     city: str = ""
 
 
-class StatesEnum(enum.Enum):
+class RegistrationStatesEnum(enum.Enum):
     NAME = 0
     COUNTRY = 1
     CITY = 2
@@ -40,7 +41,7 @@ class RegistrationController:
         
         await update.message.reply_text("Пожалуйста, введите Ваше имя:")
         
-        return StatesEnum.NAME.value
+        return RegistrationStatesEnum.NAME.value
 
     async def input_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
@@ -48,7 +49,7 @@ class RegistrationController:
         
         await update.message.reply_text("Теперь введите Вашу страну:")
         
-        return StatesEnum.COUNTRY.value
+        return RegistrationStatesEnum.COUNTRY.value
 
     async def input_country(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
@@ -56,7 +57,7 @@ class RegistrationController:
 
         await update.message.reply_text("Теперь введите Ваш город:")
 
-        return StatesEnum.CITY.value
+        return RegistrationStatesEnum.CITY.value
 
     async def input_city(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         tg_id = update.message.from_user.id
@@ -66,6 +67,8 @@ class RegistrationController:
 
         await update.message.reply_text("Теперь Вы зарегистрированы!")
 
+        await MenuController().show_menu(update, context)
+
         self.clear_user_data(tg_id)
 
         return ConversationHandler.END
@@ -74,7 +77,7 @@ class RegistrationController:
         tg_id = update.message.from_user.id
         self.clear_user_data(tg_id)
 
-        await update.message.reply_text('Регистрация отменена.')
+        await update.message.reply_text("Регистрация отменена.")
 
         return ConversationHandler.END
 
