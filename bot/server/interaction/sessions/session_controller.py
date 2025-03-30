@@ -5,10 +5,13 @@ import traceback
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
+from telegram_bot_calendar import DetailedTelegramCalendar
 
 from bot.server.interaction.sessions.session_service import SessionService
 from bot.server.common_dao.user_dao import UserDao
 
+
+STEP_RU = {'y': 'год', 'm': 'месяц', 'd': 'день'}
 
 @dataclass
 class InputSessionData:
@@ -29,9 +32,20 @@ class StatesEnum(enum.Enum):
     CITY = 2
     IS_ONLINE = 3
     MAX_PLAYERS = 4
-    START_DATETIME = 5
-    DURATION_HOURS = 6
+    START_DATE = 5
+    START_TIME = 6
+    DURATION_HOURS = 7
 
+
+class BriefCalendar(DetailedTelegramCalendar):
+    locale = 'ru'
+    prev_button = '⬅️'
+    next_button = '➡️'
+    empty_nav_button = ''
+    middle_button_year = ''
+    empty_month_button = ''
+    empty_year_button = ''
+    days_of_week = {'ru': ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']}
 
 class SessionController:
 
@@ -98,22 +112,77 @@ class SessionController:
         return StatesEnum.MAX_PLAYERS
 
     async def input_max_players(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        tg_id = update.message.from_user.id
-        self.sessions_data[tg_id].max_players = int(update.message.text)
+        try:
+            max_players = int(update.message.text)
+            if max_players <= 1 or max_players > 20:
+                raise ValueError
+        except ValueError:
+            await update.message.reply_text("Пожалуйста, укажите корректное количество игроков (от 2 до 20):")
+            return StatesEnum.MAX_PLAYERS
         
-        await update.message.reply_text("Когда начнем игру? (формат: YYYY-MM-DD HH:MM):")
-        return StatesEnum.START_DATETIME
+        tg_id = update.message.from_user.id
+        self.sessions_data[tg_id].max_players = max_players
 
-    async def input_start_datetime(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        tg_id = update.message.from_user.id
-        self.sessions_data[tg_id].start_datetime = datetime.datetime.strptime(update.message.text, "%Y-%m-%d %H:%M")
+        calendar, step = BriefCalendar(
+            min_date=datetime.date.today(),
+            max_date=datetime.date.today() + datetime.timedelta(days=30),
+            locale='ru'
+        ).build()
+        await update.message.reply_text(f"Выберите дату ({STEP_RU[step]}):", reply_markup=calendar)
+        return StatesEnum.START_DATE
+
+    async def input_start_date(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        query = update.callback_query
+        tg_id = query.from_user.id
+
+        result, key, step = BriefCalendar(
+            min_date=datetime.date.today(),
+            max_date=datetime.date.today() + datetime.timedelta(days=30),
+            locale='ru'
+        ).process(query.data)
         
-        await update.message.reply_text("Сколько она будет приблизительно идти?")
+        if not result and key:
+            await query.edit_message_text(f"*Дата проведения ({STEP_RU[step]})*", reply_markup=key, parse_mode='Markdown')
+            return StatesEnum.START_DATE
+
+        self.sessions_data[tg_id].start_datetime = result
+
+        await query.edit_message_text(f"Сессия состоится в этот день: *{result.strftime('%d.%m.%Y')}*", parse_mode='Markdown')
+        await query.message.reply_text("Во сколько начнем?", reply_markup=self.get_time_keyboard())
+        return StatesEnum.START_TIME
+
+    def get_time_keyboard(self):
+        buttons = []
+        for hour in range(8, 21):
+            buttons.append([
+                InlineKeyboardButton(f"{hour:02d}:00", callback_data=f"{hour:02d}:00"),
+                InlineKeyboardButton(f"{hour:02d}:30", callback_data=f"{hour:02d}:30")
+            ])
+        return InlineKeyboardMarkup(buttons)
+
+    async def input_start_time(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        query = update.callback_query
+        tg_id = query.from_user.id
+        time_str = query.data
+
+        self.sessions_data[tg_id].start_datetime = datetime.datetime.combine(self.sessions_data[tg_id].start_datetime, datetime.datetime.strptime(time_str, "%H:%M").time())
+        
+        await query.edit_message_text(f"Игра начнется в *{time_str}* по местному времени.", parse_mode='Markdown')
+        await query.message.reply_text(f"На сколько часов она планируется?")
+
         return StatesEnum.DURATION_HOURS
 
     async def input_duration_hours(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+        try:
+            duration_hours = int(update.message.text)
+            if duration_hours <= 0 or duration_hours > 10:
+                raise ValueError
+        except ValueError:
+            await update.message.reply_text("Пожалуйста, укажите корректную продолжительность сессии (от 1 до 10 часов):")
+            return StatesEnum.DURATION_HOURS
+        
         tg_id = update.message.from_user.id
-        self.sessions_data[tg_id].duration_hours = int(update.message.text)
+        self.sessions_data[tg_id].duration_hours = duration_hours
         await self.create_session(tg_id)
         await update.message.reply_text("Сессия успешно создана!")
         

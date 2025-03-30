@@ -633,6 +633,20 @@ toml = ["tomli (>=2.0.1)"]
 yaml = ["pyyaml (>=6.0.1)"]
 
 [[package]]
+name = "python-dateutil"
+version = "2.9.0.post0"
+description = "Extensions to the standard Python datetime module"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+files = [
+    {file = "python-dateutil-2.9.0.post0.tar.gz", hash = "sha256:37dd54208da7e1cd875388217d5e00ebd4179249f90fb72437e91a35459a0ad3"},
+    {file = "python_dateutil-2.9.0.post0-py2.py3-none-any.whl", hash = "sha256:a8b2bc7bffae282281c8140a97d3aa9c14da0b136dfe83f850eea9a5f7470427"},
+]
+
+[package.dependencies]
+six = ">=1.5"
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -671,6 +685,23 @@ socks = ["httpx[socks]"]
 webhooks = ["tornado (>=6.2,<7.0)"]
 
 [[package]]
+name = "python-telegram-bot-calendar"
+version = "1.0.5"
+description = "Python inline calendar for telegram bots"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-telegram-bot-calendar-1.0.5.tar.gz", hash = "sha256:b1536021edc6d9ed8976ecb2f20869d9558ce946e10e01c8c8b66444757d70f7"},
+    {file = "python_telegram_bot_calendar-1.0.5-py3-none-any.whl", hash = "sha256:2d4ce5aefcb54629b9f3189d9f0ca2a0ff3cdf763d6a986f581ffbc2b967bd4d"},
+]
+
+[package.dependencies]
+python-dateutil = "*"
+
+[package.extras]
+telethon = ["telethon"]
+
+[[package]]
 name = "rfc3986"
 version = "1.5.0"
 description = "Validating URI References per RFC 3986"
@@ -686,6 +717,17 @@ idna = {version = "*", optional = true, markers = "extra == \"idna2008\""}
 
 [package.extras]
 idna2008 = ["idna"]
+
+[[package]]
+name = "six"
+version = "1.17.0"
+description = "Python 2 and 3 compatibility utilities"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
+files = [
+    {file = "six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274"},
+    {file = "six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81"},
+]
 
 [[package]]
 name = "sniffio"
@@ -807,4 +849,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "f397790a887eb305a0603a97d370523f20fba2362c6d743d736619e448a602dc"
+content-hash = "b211babd45ffc0f42166c0d1bee1cdd9168d94c8d0d1155fa7c6751b77dcadc3"
