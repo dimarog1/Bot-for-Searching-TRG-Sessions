@@ -15,8 +15,4 @@ def init_handlers(app: Application):
 
 __all__ = [
     init_handlers
-<<<<<<< HEAD
 ]
-=======
-]
->>>>>>> 774b0492a9ba84a8ef4c260c48d65e22bcf2fdae
