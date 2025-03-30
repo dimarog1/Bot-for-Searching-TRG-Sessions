@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: c4049f5263e5
+Revision ID: 296524f2a006
 Revises: 
-Create Date: 2025-02-07 01:15:09.567686
+Create Date: 2025-03-08 00:48:59.594498
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c4049f5263e5'
+revision: str = '296524f2a006'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,14 +37,6 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id_', name=op.f('pk__Users'))
     )
-    op.create_table('Games',
-    sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('genre_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['genre_id'], ['Genres.id_'], name=op.f('fk__Games__genre_id__Genres')),
-    sa.ForeignKeyConstraint(['id_'], ['Games.id_'], name=op.f('fk__Games__id___Games')),
-    sa.PrimaryKeyConstraint('id_', name=op.f('pk__Games'))
-    )
     op.create_table('Logs',
     sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
@@ -54,17 +46,10 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['Users.id_'], name=op.f('fk__Logs__user_id__Users')),
     sa.PrimaryKeyConstraint('id_', name=op.f('pk__Logs'))
     )
-    op.create_table('UserGenres',
-    sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('genre_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['genre_id'], ['Genres.id_'], name=op.f('fk__UserGenres__genre_id__Genres')),
-    sa.ForeignKeyConstraint(['user_id'], ['Users.id_'], name=op.f('fk__UserGenres__user_id__Users')),
-    sa.PrimaryKeyConstraint('id_', name=op.f('pk__UserGenres'))
-    )
     op.create_table('Sessions',
     sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('game_id', sa.Integer(), nullable=False),
+    sa.Column('genre_ids', sa.ARRAY(sa.Integer()), nullable=True),
+    sa.Column('game_name', sa.String(length=50), nullable=False),
     sa.Column('master_id', sa.Integer(), nullable=False),
     sa.Column('country', sa.String(length=50), nullable=False),
     sa.Column('city', sa.String(length=50), nullable=False),
@@ -74,18 +59,23 @@ def upgrade() -> None:
     sa.Column('start_datetime', sa.DateTime(), nullable=False),
     sa.Column('duration_hours', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Float(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['game_id'], ['Games.id_'], name=op.f('fk__Sessions__game_id__Games')),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['master_id'], ['Users.id_'], name=op.f('fk__Sessions__master_id__Users')),
     sa.PrimaryKeyConstraint('id_', name=op.f('pk__Sessions'))
+    )
+    op.create_table('UserGenres',
+    sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('genre_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['genre_id'], ['Genres.id_'], name=op.f('fk__UserGenres__genre_id__Genres')),
+    sa.ForeignKeyConstraint(['user_id'], ['Users.id_'], name=op.f('fk__UserGenres__user_id__Users')),
+    sa.PrimaryKeyConstraint('id_', name=op.f('pk__UserGenres'))
     )
     op.create_table('Recommendations',
     sa.Column('id_', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('game_id', sa.Integer(), nullable=False),
     sa.Column('session_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['game_id'], ['Games.id_'], name=op.f('fk__Recommendations__game_id__Games')),
     sa.ForeignKeyConstraint(['session_id'], ['Sessions.id_'], name=op.f('fk__Recommendations__session_id__Sessions')),
     sa.ForeignKeyConstraint(['user_id'], ['Users.id_'], name=op.f('fk__Recommendations__user_id__Users')),
     sa.PrimaryKeyConstraint('id_', name=op.f('pk__Recommendations'))
@@ -119,10 +109,9 @@ def downgrade() -> None:
     op.drop_table('SessionPlayers')
     op.drop_table('Reviews')
     op.drop_table('Recommendations')
-    op.drop_table('Sessions')
     op.drop_table('UserGenres')
+    op.drop_table('Sessions')
     op.drop_table('Logs')
-    op.drop_table('Games')
     op.drop_table('Users')
     op.drop_table('Genres')
     # ### end Alembic commands ###

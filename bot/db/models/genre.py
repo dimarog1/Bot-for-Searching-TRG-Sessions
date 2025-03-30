@@ -11,7 +11,6 @@ class Genre(DeclarativeBase):
     name = Column(String(50), nullable=False)
 
     user_genres = relationship('UserGenre', back_populates='genre')
-    games = relationship('Game', back_populates='genre')
 
     def __repr__(self):
         return f"Genre(id={self.id_}, name={self.name})"
