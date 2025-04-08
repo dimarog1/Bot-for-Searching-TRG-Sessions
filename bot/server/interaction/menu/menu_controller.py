@@ -45,11 +45,11 @@ class MenuController:
             case MenuStatesEnum.PROFILE.value:
                 await MenuController.profile(update, context)
             case MenuStatesEnum.SESSIONS.value:
-                raise NotImplementedError(f"{MenuStatesEnum.SESSIONS.value} not implemented yet")
+                raise NotImplementedError(f"{MenuStatesEnum.SESSIONS.value} is not implemented yet")
             case MenuStatesEnum.MASTER_SEARCH.value:
-                raise NotImplementedError(f"{MenuStatesEnum.MASTER_SEARCH.value} not implemented yet")
+                raise NotImplementedError(f"{MenuStatesEnum.MASTER_SEARCH.value} is not implemented yet")
             case MenuStatesEnum.SETTINGS.value:
-                raise NotImplementedError(f"{MenuStatesEnum.SETTINGS.value} not implemented yet")
+                raise NotImplementedError(f"{MenuStatesEnum.SETTINGS.value} is not implemented yet")
             case MenuStatesEnum.SUPPORT.value:
                 await MenuController.support(update, context)
 
@@ -68,11 +68,11 @@ class MenuController:
                 parse_mode="Markdown"
             )
         except UserNotExistsException:
-            await update.message.reply_text("Вы не зарегистрированы, чтобы зарегистрироваться напишите /register")
+            await update.message.reply_text("Вы не зарегистрированы.\nПожалуйста, воспользуйтесь командой /register")
 
     @staticmethod
     async def support(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text("Напишите нам: @dimarog1 или @mureann")
+        await update.message.reply_text("По всем вопросам по боту обращайтесь к Дмитрию (@dimarog1) или Антону (@mureann)")
 
     @staticmethod
     async def handle_inline_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

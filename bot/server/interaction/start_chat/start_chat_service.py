@@ -10,6 +10,6 @@ class StartChatService:
 
         if registered:
             user = await UserDao.get_user_by_tg_id(tg_id)
-            return f"Привет, {user.name}! Вы можете посмотреть меню в клавиатуре"
+            return f"Привет, {user.name}!\nОсновное меню находится ниже - у вас в клавиатуре.\n" \
 
-        return "Привет! Я бот для поиска TRG сессий. Чтобы зарегистрироваться, напишите /register"
+        return "О, похоже, что Вы впервые тут!\nЧтобы зарегистрироваться, воспользуйтесь /register"
