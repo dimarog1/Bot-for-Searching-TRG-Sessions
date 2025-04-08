@@ -290,7 +290,7 @@ f"""🎲 *{session.game_name}*\n
 👥 *{session.current_players}/{session.max_players}*
 🗓️ *{start_date}*
 ⏰ *{session.start_datetime.strftime('%H:%M')}*-*{end_datetime.strftime('%H:%M')} ({session.duration_hours}ч.)*\n
-――――――――――――――――――――――――
+――
 *Организатор:* {master_info} 
 """,
 parse_mode='Markdown')
