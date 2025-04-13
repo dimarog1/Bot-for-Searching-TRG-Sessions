@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from bot.enums.country_codes import CountryCodes
 from bot.server.interaction.conversation_states import ConversationStates
+from bot.server.interaction.menu import MenuController
 from bot.server.interaction.registration.registration_service import RegistrationService
 from bot.utils import geo_utils
 
@@ -28,7 +29,7 @@ class RegistrationController:
         tg_id = update.message.from_user.id
 
         if await RegistrationService.is_registered(tg_id):
-            await MenuDavalka.show_main_menu(update, context)
+            await MenuController.show_main_menu(update, context)
             return ConversationStates.MENU
 
         if "registration_data" not in context.user_data:
@@ -36,6 +37,9 @@ class RegistrationController:
 
         context.user_data["registration_data"]["tg_id"] = tg_id
 
+        await update.message.reply_text(
+            "О, похоже, что Вы впервые тут! Давайте знакомиться)"
+        )
         await update.message.reply_text("Укажите Ваше имя:")
         return ConversationStates.ENTER_PROFILE_NAME
 

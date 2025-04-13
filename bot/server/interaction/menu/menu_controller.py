@@ -99,7 +99,9 @@ class MenuController:
 
     @staticmethod
     async def support(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text("По всем вопросам по боту обращайтесь к Дмитрию (@dimarog1) или Антону (@mureann)")
+        await update.message.reply_text(
+            "По всем вопросам по боту обращайтесь к Дмитрию (@dimarog1) или Антону (@mureann)"
+        )
         return ConversationStates.MENU
 
     @staticmethod
