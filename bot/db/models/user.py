@@ -10,6 +10,7 @@ class User(DeclarativeBase):
     id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     name = Column(String(50), nullable=False)
     tg_id = Column(Integer, nullable=False)
+    tg_username = Column(String(50), nullable=True)
     is_admin = Column(Boolean, default=False)
     country = Column(String(50), nullable=False)
     city = Column(String(50), nullable=False)
@@ -25,4 +26,4 @@ class User(DeclarativeBase):
     user_genres = relationship("UserGenre", back_populates="user")
 
     def __repr__(self):
-        return f"User(id={self.id_}, name='{self.name}')"
+        return f"User(id={self.id_}, tg_username='{self.tg_username}')"

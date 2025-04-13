@@ -16,6 +16,7 @@ class RegistrationController:
         try:
             await RegistrationService.register_user(
                 tg_id,
+                user_data.get("tg_username", ""),
                 user_data.get("name", ""),
                 user_data.get("country", ""),
                 user_data.get("city", ""),
@@ -36,9 +37,10 @@ class RegistrationController:
             context.user_data["registration_data"] = {}
 
         context.user_data["registration_data"]["tg_id"] = tg_id
+        context.user_data["registration_data"]["tg_username"] = update.message.from_user.username
 
         await update.message.reply_text(
-            "О, похоже, что Вы впервые тут! Давайте знакомиться)"
+            "О, похоже, что Вы впервые тут! Давайте знакомиться :)"
         )
         await update.message.reply_text("Укажите Ваше имя:")
         return ConversationStates.ENTER_PROFILE_NAME
