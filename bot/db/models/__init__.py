@@ -7,7 +7,6 @@ from bot.db.models.session_player import SessionPlayer
 from bot.db.models.user import User
 from bot.db.models.user_genre import UserGenre
 
-
 __all__ = [
     "Genre",
     "Log",

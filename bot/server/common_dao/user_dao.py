@@ -1,8 +1,7 @@
 from sqlalchemy import exists, select, text
 
-from bot.db.models import User
-
 from bot.db.connection import SessionManager
+from bot.db.models import User
 
 
 class UserDao:
@@ -17,9 +16,11 @@ class UserDao:
 
     @staticmethod
     async def get_user_by_tg_id(tg_id: int) -> User | None:
-        query = text("""SELECT * 
+        query = text(
+            """SELECT * 
                         FROM "Users"
-                        WHERE tg_id = :tg_id""")
+                        WHERE tg_id = :tg_id"""
+        )
 
         async with SessionManager.get_session() as session:
             user = (await session.execute(query, {"tg_id": tg_id})).first()
@@ -28,52 +29,68 @@ class UserDao:
 
     @staticmethod
     async def set_user_name(tg_id: int, new_name: str) -> User | None:
-        query = text("""UPDATE "Users" 
+        query = text(
+            """UPDATE "Users" 
                         SET name = :name 
                         WHERE tg_id = :tg_id 
-                        RETURNING *""")
+                        RETURNING *"""
+        )
 
         async with SessionManager.get_session() as session:
-            user = (await session.execute(query, {"tg_id": tg_id, "name": new_name})).first()
+            user = (
+                await session.execute(query, {"tg_id": tg_id, "name": new_name})
+            ).first()
             await session.commit()
 
         return user
 
     @staticmethod
     async def set_user_city(tg_id: int, new_city: str) -> User | None:
-        query = text("""UPDATE "Users" 
+        query = text(
+            """UPDATE "Users" 
                         SET city = :city 
                         WHERE tg_id = :tg_id 
-                        RETURNING *""")
+                        RETURNING *"""
+        )
 
         async with SessionManager.get_session() as session:
-            user = (await session.execute(query, {"tg_id": tg_id, "city": new_city})).first()
+            user = (
+                await session.execute(query, {"tg_id": tg_id, "city": new_city})
+            ).first()
             await session.commit()
 
         return user
 
     @staticmethod
     async def set_user_country(tg_id: int, new_country: str) -> User | None:
-        query = text("""UPDATE "Users" 
+        query = text(
+            """UPDATE "Users" 
                         SET country = :country 
                         WHERE tg_id = :tg_id 
-                        RETURNING *""")
+                        RETURNING *"""
+        )
 
         async with SessionManager.get_session() as session:
-            user = (await session.execute(query, {"tg_id": tg_id, "country": new_country})).first()
+            user = (
+                await session.execute(query, {"tg_id": tg_id, "country": new_country})
+            ).first()
             await session.commit()
 
         return user
 
     @staticmethod
     async def set_user_rating(tg_id: int, new_rating: str) -> User | None:
-        query = text("""UPDATE "Users" 
+        query = text(
+            """UPDATE "Users" 
                         SET rating = :new_rating 
                         WHERE tg_id = :tg_id 
-                        RETURNING *""")
+                        RETURNING *"""
+        )
 
         async with SessionManager.get_session() as session:
-            user = (await session.execute(query, {"tg_id": tg_id, "rating": new_rating})).first()
+            user = (
+                await session.execute(query, {"tg_id": tg_id, "rating": new_rating})
+            ).first()
             await session.commit()
 
         return user

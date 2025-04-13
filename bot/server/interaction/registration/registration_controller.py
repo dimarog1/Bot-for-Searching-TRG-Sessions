@@ -1,103 +1,108 @@
-from dataclasses import dataclass
-import enum
-import traceback
-
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import ContextTypes
 
-from .registration_service import RegistrationService
-from bot.server.interaction.menu.menu_controller import MenuController
-from bot.utils import geo_utils
 from bot.enums.country_codes import CountryCodes
-
+from bot.server.interaction.conversation_states import ConversationStates
+from bot.server.interaction.menu import MenuController
 from bot.server.interaction.registration.registration_service import RegistrationService
-
-
-@dataclass
-class InputUserData:
-    tg_id: int = 0
-    name: str = ""
-    country: str = ""
-    city: str = ""
-
-
-class StatesEnum(enum.Enum):
-    NAME = 0
-    COUNTRY = 1
-    CITY = 2
+from bot.utils import geo_utils
 
 
 class RegistrationController:
+    def __init__(self, menu_controller):
+        self.menu_controller = menu_controller
 
-    def __init__(self):
-        self.users_data: dict[int, InputUserData] = dict()
-
-    async def register_user(self, tg_id: int) -> None:
+    async def register_user(self, tg_id: int, user_data: dict) -> None:
         try:
-            user = self.users_data[tg_id]
-            await RegistrationService.register_user(user.tg_id, user.name, user.country, user.city)
-        except Exception:
-            print(traceback.format_exc())
+            await RegistrationService.register_user(
+                tg_id,
+                user_data.get("name", ""),
+                user_data.get("country", ""),
+                user_data.get("city", ""),
+            )
+        except Exception as e:
+            print(f"Ошибка при регистрации пользователя: {e}")
 
-    async def start_register(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    async def start_register(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
         tg_id = update.message.from_user.id
 
         if await RegistrationService.is_registered(tg_id):
-            await update.message.reply_text("Вы уже зарегистрированы.")
-            return ConversationHandler.END
+            await MenuController.show_main_menu(update, context)
+            return ConversationStates.MENU
 
-        self.users_data[tg_id] = InputUserData(tg_id=tg_id)
-        
+        if "registration_data" not in context.user_data:
+            context.user_data["registration_data"] = {}
+
+        context.user_data["registration_data"]["tg_id"] = tg_id
+
+        await update.message.reply_text(
+            "О, похоже, что Вы впервые тут! Давайте знакомиться)"
+        )
         await update.message.reply_text("Укажите Ваше имя:")
-        return StatesEnum.NAME
+        return ConversationStates.ENTER_PROFILE_NAME
 
-    async def input_name(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        tg_id = update.message.from_user.id
-        self.users_data[tg_id].name = update.message.text
+    async def input_name(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
+        context.user_data["registration_data"]["name"] = update.message.text
 
         keyboard = [
-            [InlineKeyboardButton(country.value, callback_data=country.value) for country in CountryCodes]
+            [
+                InlineKeyboardButton(country.value, callback_data=country.value)
+                for country in CountryCodes
+            ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
-        
-        await update.message.reply_text("Выберите страну из списка:", reply_markup=reply_markup)
 
-        return StatesEnum.COUNTRY
+        await update.message.reply_text(
+            "Выберите страну из списка:", reply_markup=reply_markup
+        )
 
-    async def input_country(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        tg_id = update.callback_query.from_user.id
-        self.users_data[tg_id].country = update.callback_query.data
+        return ConversationStates.ENTER_PROFILE_COUNTRY
+
+    async def input_country(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
+        context.user_data["registration_data"]["country"] = update.callback_query.data
 
         await update.callback_query.message.reply_text("Укажите Ваш город:")
-        return StatesEnum.CITY
+        return ConversationStates.ENTER_PROFILE_CITY
 
-    async def input_city(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    async def input_city(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
         tg_id = update.message.from_user.id
+        city = update.message.text
+        country = context.user_data["registration_data"]["country"]
 
-        value_to_key = {country_code.value: country_code.name for country_code in CountryCodes}
-        if not geo_utils.get_location(value_to_key[self.users_data[tg_id].country], update.message.text):
-            await update.message.reply_text("Такого города не существует. Попробуйте еще раз.")
+        value_to_key = {
+            country_code.value: country_code.name for country_code in CountryCodes
+        }
+        if not geo_utils.get_location(value_to_key[country], city):
+            await update.message.reply_text(
+                "Такого города не существует. Попробуйте еще раз."
+            )
             return await self.input_country(update, context)
 
-        self.users_data[tg_id].city = update.message.text.capitalize()
+        context.user_data["registration_data"]["city"] = city.capitalize()
 
-        await self.register_user(tg_id)
-
+        await self.register_user(tg_id, context.user_data["registration_data"])
         await update.message.reply_text("Вы успешно зарегистрированы!")
 
-        await MenuController().show_menu(update, context)
+        await self.menu_controller.show_main_menu(update, context)
 
-        self.clear_user_data(tg_id)
+        if "registration_data" in context.user_data:
+            del context.user_data["registration_data"]
 
-        return ConversationHandler.END
+        return ConversationStates.MENU
 
-    async def cancel(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-        tg_id = update.message.from_user.id
-        self.clear_user_data(tg_id)
+    async def cancel(
+        self, update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
+        if "registration_data" in context.user_data:
+            del context.user_data["registration_data"]
 
         await update.message.reply_text("Регистрация отменена.")
-
-        return ConversationHandler.END
-
-    def clear_user_data(self, tg_id: int) -> None:
-        del self.users_data[tg_id]
+        return ConversationStates.MENU

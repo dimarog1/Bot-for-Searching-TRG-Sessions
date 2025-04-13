@@ -1,7 +1,9 @@
 .venv
 venv
 .idea
+.vscode
 .pyc
 .env
 .vscode
 __pycache__
+persistence_data.pickle

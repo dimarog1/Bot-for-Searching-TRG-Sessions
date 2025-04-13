@@ -1,8 +1,7 @@
 from sqlalchemy import exists, select, text
 
-from bot.db.models import Session
-
 from bot.db.connection import SessionManager
+from bot.db.models import Session
 
 
 class SessionDao:
@@ -14,49 +13,63 @@ class SessionDao:
             await session.commit()
 
         return game_session
-    
+
     @staticmethod
     async def get_sessions_by_game_name(game_name: str) -> Session:
-        query = text("""SELECT s.*
+        query = text(
+            """SELECT s.*
                         FROM "Sessions" s
                         JOIN "Games" g ON s.game_id = g.id_
-                        WHERE g.name LIKE ':game_name'""")
+                        WHERE g.name LIKE ':game_name'"""
+        )
 
         async with SessionManager.get_session() as session:
             result = (await session.execute(query, {"game_name": game_name})).scalar()
 
         return result
-    
+
     @staticmethod
     async def get_sessions_by_master(master: str) -> Session:
-        query = text("""SELECT s.*
+        query = text(
+            """SELECT s.*
                         FROM "Sessions" s
                         JOIN "Users" u ON s.master_id = u.id_
-                        WHERE u.name LIKE 'master'""")
+                        WHERE u.name LIKE 'master'"""
+        )
 
         async with SessionManager.get_session() as session:
             result = (await session.execute(query, {"master": master})).scalar()
 
         return result
-    
+
     @staticmethod
     async def get_sessions_by_max_players(max_players: int, comparator: str) -> Session:
-        query = text("""SELECT s.*
+        query = text(
+            """SELECT s.*
                         FROM "Sessions" s
-                        WHERE s.max_players :comparator :max_players""")
+                        WHERE s.max_players :comparator :max_players"""
+        )
 
         async with SessionManager.get_session() as session:
-            result = (await session.execute(query, {"max_players": max_players, "comparator": comparator})).scalar()
+            result = (
+                await session.execute(
+                    query, {"max_players": max_players, "comparator": comparator}
+                )
+            ).scalar()
 
         return result
-    
+
     @staticmethod
     async def get_sessions_by_location(country: str, city: str) -> Session:
-        query = text("""SELECT *
+        query = text(
+            """SELECT *
                         FROM "Sessions"
-                        WHERE country = :country AND city = :city""")
+                        WHERE country = :country AND city = :city"""
+        )
 
         async with SessionManager.get_session() as session:
-            result = (await session.execute(query, {"country": country, "city": city})).scalar()
+            result = (
+                await session.execute(query, {"country": country, "city": city})
+            ).scalar()
 
         return result

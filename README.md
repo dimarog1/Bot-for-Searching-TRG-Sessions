@@ -43,3 +43,9 @@ make run
 ```bash
 make revision
 ```
+
+### Formatting
+
+```bash
+make format
+```
