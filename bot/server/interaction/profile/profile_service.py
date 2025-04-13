@@ -5,18 +5,19 @@ from bot.server.common_dao import UserDao
 from bot.utils.registration_utils import registration_required
 
 
-class MenuService:
-
+class ProfileService:
     @staticmethod
     @registration_required
     async def get_profile_info(tg_id: int) -> str:
         user = await UserDao.get_user_by_tg_id(tg_id)
 
-        user_profile_info = textwrap.dedent(f"""
-            👤*Имя*: {user.name}
-            📍*Локация*: {user.country}, {user.city}
-            ⭐️*Рейтинг*: {user.rating}
-            """).strip()
+        user_profile_info = textwrap.dedent(
+            f"""
+                👤*Имя*: {user.name}
+                📍*Локация*: {user.country}, {user.city}
+                ⭐️*Рейтинг*: {user.rating}
+                """
+        ).strip()
 
         return user_profile_info
 
@@ -34,4 +35,3 @@ class MenuService:
     @registration_required
     async def set_user_country(tg_id: int, new_country: str) -> User:
         return await UserDao.set_user_country(tg_id, new_country)
-

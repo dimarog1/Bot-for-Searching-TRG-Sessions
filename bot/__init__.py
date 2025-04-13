@@ -1,7 +1,7 @@
-from telegram.ext import Application
+from telegram.ext import Application, PicklePersistence
 
-from bot.server import init_handlers
 from bot.config import get_settings
+from bot.server import init_handlers
 
 
 class TRGBot:
@@ -9,10 +9,11 @@ class TRGBot:
         self.token = token
 
     def build_bot(self):
-        app = Application.builder().token(self.token).build()
+        persistence = PicklePersistence(filepath=get_settings().persistence_data)
+        app = Application.builder().token(self.token).persistence(persistence).build()
         return app
 
     @staticmethod
     def start_bot(app: Application) -> None:
-        print("Бот запущен...")
+        print("Бот запущен")
         app.run_polling()
