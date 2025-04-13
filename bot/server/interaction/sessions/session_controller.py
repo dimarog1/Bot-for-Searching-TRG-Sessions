@@ -1,3 +1,4 @@
+import enum
 import datetime
 import traceback
 from dataclasses import dataclass
@@ -24,6 +25,17 @@ class InputSessionData:
     max_players: int = 0
     start_datetime: datetime.datetime = ""
     duration_hours: int = 0
+
+
+class SessionSearhcingStatesEnum(enum.Enum):
+    GAME_NAME = 0
+    COUNTRY = 1
+    CITY = 2
+    IS_ONLINE = 3
+    MAX_PLAYERS = 4
+    START_DATE = 5
+    START_TIME = 6
+    DURATION_HOURS = 7
 
 
 class BriefCalendar(DetailedTelegramCalendar):
@@ -249,3 +261,36 @@ class SessionController:
 
     def clear_session_data(self, tg_id: int) -> None:
         del self.sessions_data[tg_id]
+
+
+    async def show_all_sessions(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        tg_id = update.message.from_user.id
+        user = await UserDao.get_user_by_tg_id(tg_id)
+        if user is None:
+            await update.message.reply_text("Похоже, Вы еще не зарегистрированы.\nВоспользуйтесь командой /register")
+            return ConversationHandler.END
+
+        sessions = await SessionService.get_all_sessions()
+        if not sessions:
+            await update.message.reply_text("Доступных сессий пока нет :(")
+            return
+
+        for session in sessions:
+            end_datetime = session.start_datetime + datetime.timedelta(hours=session.duration_hours)
+            start_date = session.start_datetime.strftime('%d.%m.%Y') if end_datetime.date() == session.start_datetime.date() else f"{session.start_datetime.date().strftime('%d.%m.%Y')} (+1)"
+            location = f"{session.country}, {session.city}" if session.country != "online" else "онлайн"
+            master = await UserDao.get_user_by_id(session.master_id)
+            master_info = f"{master.name} *[{master.rating}⭐️]*"
+            if master.tg_username:
+                master_info += f" - @{master.tg_username}"
+
+            await update.message.reply_text(
+f"""🎲 *{session.game_name}*\n
+📍 *{location}*
+👥 *{session.current_players}/{session.max_players}*
+🗓️ *{start_date}*
+⏰ *{session.start_datetime.strftime('%H:%M')}*-*{end_datetime.strftime('%H:%M')} ({session.duration_hours}ч.)*\n
+――
+*Организатор:* {master_info} 
+""",
+parse_mode='Markdown')

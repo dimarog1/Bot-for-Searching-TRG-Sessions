@@ -9,11 +9,12 @@ class RegistrationService:
 
     @staticmethod
     async def register_user(
-        tg_id: int,
-        name: str,
-        country: str,
-        city: str,
+            tg_id: int,
+            tg_username: str,
+            name: str,
+            country: str,
+            city: str,
     ) -> User:
-        user = User(tg_id=tg_id, name=name, country=country, city=city)
+        user = User(tg_id=tg_id, tg_username = tg_username, name=name, country=country, city=city)
 
         return await UserDao.write_user_to_db(user)

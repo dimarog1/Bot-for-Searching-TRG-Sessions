@@ -15,6 +15,15 @@ class SessionDao:
         return game_session
 
     @staticmethod
+    async def get_all_sessions() -> list[Session]:
+        query = select(Session)
+
+        async with SessionManager.get_session() as session:
+            result = (await session.execute(query)).scalars().all()
+
+        return result
+
+    @staticmethod
     async def get_sessions_by_game_name(game_name: str) -> Session:
         query = text(
             """SELECT s.*

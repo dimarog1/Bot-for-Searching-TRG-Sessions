@@ -111,9 +111,12 @@ def init_handlers(app: Application):
         fallbacks=[CommandHandler("cancel", registration_controller.cancel)],
         name="main_conversation",
         persistent=True,
+        per_message=False
     )
 
     app.add_handler(conversation_handler)
+
+    print("Handlers initialized")
 
 
 __all__ = [

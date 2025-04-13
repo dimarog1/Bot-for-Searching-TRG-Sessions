@@ -39,8 +39,8 @@ class TRGBot:
 
     @staticmethod
     def start_bot(app: Application) -> None:
-        print("Бот запущен...")
         app.add_handler(CommandHandler("help", TRGBot.help_command))
         app.add_handler(CommandHandler("about", TRGBot.about))
         app.post_init = TRGBot.set_commands
+        print("Бот запущен...")
         app.run_polling()

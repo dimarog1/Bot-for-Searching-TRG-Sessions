@@ -15,6 +15,17 @@ class UserDao:
         return user
 
     @staticmethod
+    async def get_user_by_id(id_: int) -> User | None:
+        query = text("""SELECT * 
+                        FROM "Users"
+                        WHERE id_ = :id_""")
+
+        async with SessionManager.get_session() as session:
+            user = (await session.execute(query, {"id_": id_})).first()
+
+        return user
+
+    @staticmethod
     async def get_user_by_tg_id(tg_id: int) -> User | None:
         query = text(
             """SELECT * 

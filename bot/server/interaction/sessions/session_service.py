@@ -28,3 +28,7 @@ class SessionService:
         )
 
         return await SessionDao.write_session_to_db(session)
+
+    @staticmethod
+    async def get_all_sessions() -> list[Session]:
+        return await SessionDao.get_all_sessions()
