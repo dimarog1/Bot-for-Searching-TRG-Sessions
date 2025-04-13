@@ -1,16 +1,26 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ARRAY, ForeignKey, func
+from sqlalchemy import (
+    ARRAY,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    func,
+)
 from sqlalchemy.orm import relationship
 
 from bot.db import DeclarativeBase
 
 
 class Session(DeclarativeBase):
-    __tablename__ = 'Sessions'
+    __tablename__ = "Sessions"
 
     id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
     genre_ids = Column(ARRAY(Integer))
     game_name = Column(String(50), nullable=False)
-    master_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
+    master_id = Column(Integer, ForeignKey("Users.id_"), nullable=False)
     country = Column(String(50), nullable=False)
     city = Column(String(50), nullable=False)
     is_online = Column(Boolean, default=False)
@@ -22,11 +32,11 @@ class Session(DeclarativeBase):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=True, onupdate=func.now())
 
-    reviews = relationship('Review', back_populates='session')
-    session_players = relationship('SessionPlayer', back_populates='session')
-    recommendations = relationship('Recommendation', back_populates='session')
+    reviews = relationship("Review", back_populates="session")
+    session_players = relationship("SessionPlayer", back_populates="session")
+    recommendations = relationship("Recommendation", back_populates="session")
 
-    master = relationship('User', back_populates='sessions')
+    master = relationship("User", back_populates="sessions")
 
     def __repr__(self):
         return f"Session(id={self.id_}, game_id={self.game_id}, master_id={self.master_id})"

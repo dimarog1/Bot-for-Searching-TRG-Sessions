@@ -1,4 +1,5 @@
 from os import environ
+from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
@@ -53,6 +54,20 @@ class DefaultSettings(BaseSettings):
         return "postgresql://{user}:{password}@{host}:{port}/{database}".format(
             **self.database_settings,
         )
+
+    @property
+    def bot_dir_path(self) -> Path:
+        """
+        Get bot directory path.
+        """
+        return Path(__file__).parent.parent.parent.absolute() / "bot"
+
+    @property
+    def persistence_data(self) -> Path:
+        """
+        Get bot directory path.
+        """
+        return self.bot_dir_path / "persistence_data.pickle"
 
     class Config:
         env_file = ".env"

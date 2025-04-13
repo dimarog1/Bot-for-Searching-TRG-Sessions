@@ -1,0 +1,12 @@
+[MASTER]
+ignore=.git,venv,.venv,__pycache__
+init-hook='import sys; sys.path.append(".")'
+
+[FORMAT]
+max-line-length=150
+
+[MESSAGES CONTROL]
+disable=C0111,R0903,C0103
+
+[DESIGN]
+max-args=8

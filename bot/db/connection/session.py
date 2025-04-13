@@ -1,8 +1,13 @@
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_scoped_session
-from sqlalchemy.orm import sessionmaker
-from contextlib import asynccontextmanager
-from typing import AsyncGenerator, Optional, ClassVar, Any
 import asyncio
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, ClassVar, Optional
+
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_scoped_session,
+    create_async_engine,
+)
+from sqlalchemy.orm import sessionmaker
 
 from bot.config import get_settings
 
@@ -13,7 +18,7 @@ class SessionManager:
     issuing sessions, storing and updating connection settings.
     """
 
-    _instance: ClassVar[Optional['SessionManager']] = None
+    _instance: ClassVar[Optional["SessionManager"]] = None
     _engine: Optional[create_async_engine] = None
     _session_factory: Optional[async_scoped_session] = None
 
@@ -28,16 +33,11 @@ class SessionManager:
     async def _initialize(self) -> None:
         """Инициализация внутренних компонентов"""
         self._engine = create_async_engine(
-            get_settings().database_uri,
-            **self.engine_kwargs
+            get_settings().database_uri, **self.engine_kwargs
         )
         self._session_factory = async_scoped_session(
-            sessionmaker(
-                self._engine,
-                expire_on_commit=False,
-                class_=AsyncSession
-            ),
-            scopefunc=lambda: id(asyncio.current_task())
+            sessionmaker(self._engine, expire_on_commit=False, class_=AsyncSession),
+            scopefunc=lambda: id(asyncio.current_task()),
         )
 
     def __new__(cls):
@@ -46,11 +46,15 @@ class SessionManager:
         return cls.instance  # noqa
 
     def refresh(self) -> None:
-        self._engine = create_async_engine(get_settings().database_uri, echo=True, future=True)
+        self._engine = create_async_engine(
+            get_settings().database_uri, echo=True, future=True
+        )
 
     @classmethod
     @asynccontextmanager
-    async def get_session(cls, **engine_kwargs: Any) -> AsyncGenerator[AsyncSession, None]:
+    async def get_session(
+        cls, **engine_kwargs: Any
+    ) -> AsyncGenerator[AsyncSession, None]:
         """
         Статический метод для получения сессии через контекстный менеджер.
         При первом вызове требуется передача параметров подключения.
@@ -59,7 +63,9 @@ class SessionManager:
             cls._instance = SessionManager(**engine_kwargs)
             await cls._instance._initialize()
         elif engine_kwargs:
-            raise RuntimeError("Database already initialized. Parameters cannot be changed.")
+            raise RuntimeError(
+                "Database already initialized. Parameters cannot be changed."
+            )
 
         session = cls._instance._session_factory()
 

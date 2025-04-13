@@ -1,18 +1,18 @@
-from sqlalchemy import Column, Integer, Sequence, ForeignKey
+from sqlalchemy import Column, ForeignKey, Integer, Sequence
 from sqlalchemy.orm import relationship
 
 from bot.db import DeclarativeBase
 
 
 class Recommendation(DeclarativeBase):
-    __tablename__ = 'Recommendations'
+    __tablename__ = "Recommendations"
 
     id_ = Column(Integer, autoincrement=True, primary_key=True, nullable=False)
-    user_id = Column(Integer, ForeignKey('Users.id_'), nullable=False)
-    session_id = Column(Integer, ForeignKey('Sessions.id_'), nullable=False)
+    user_id = Column(Integer, ForeignKey("Users.id_"), nullable=False)
+    session_id = Column(Integer, ForeignKey("Sessions.id_"), nullable=False)
 
-    user = relationship('User', back_populates='recommendations')
-    session = relationship('Session', back_populates='recommendations')
+    user = relationship("User", back_populates="recommendations")
+    session = relationship("Session", back_populates="recommendations")
 
     def __repr__(self):
         return f"Recommendation(id={self.id_}, user_id={self.user_id}, game_id={self.game_id}, session_id={self.session_id})"

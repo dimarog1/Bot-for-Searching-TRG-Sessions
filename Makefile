@@ -12,6 +12,7 @@ MESSAGE = "Done"
 endif
 
 APPLICATION_NAME = bot
+CODE = bot
 
 HELP_FUN = \
     %help; while(<>){push@{$$help{$$2//'options'}},[$$1,$$3] \
@@ -32,12 +33,20 @@ help: ##@Help Show this help
 db:  ##@Database Create database with docker-compose
 	docker compose -f docker-compose.yaml up bot_db -d --remove-orphans
 
-lint:  ##@Code Check code with pylint
-	poetry run python -m pylint $(CODE)
+lint:  ##@Code Check code with linters
+	poetry run flake8 $(CODE)
+	poetry run pylint $(CODE)
+	poetry run mypy $(CODE)
+
+lint-fix:  ##@Code Fix format and then lint
+	make format
+	make lint
+
+precommit: lint-fix  ##@Code Run all pre-commit checks
 
 format:  ##@Code Reformat code with isort and black
-	poetry run python -m isort $(CODE)
-	poetry run python -m black $(CODE)
+	poetry run isort $(CODE)
+	poetry run black $(CODE)
 
 migrate:  ##@Database Do all migrations in database
 	cd $(APPLICATION_NAME)/db && PYTHONPATH=../.. alembic upgrade $(args)

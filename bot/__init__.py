@@ -1,9 +1,9 @@
-from sqlalchemy import Update
+from telegram.ext import Application, PicklePersistence
 from telegram import BotCommand, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-from bot.server import init_handlers
 from bot.config import get_settings
+from bot.server import init_handlers
 
 
 class TRGBot:
@@ -22,7 +22,7 @@ class TRGBot:
 """🤖 Я TRG бот и предназначен для поиска и управления сессиями для настольных ролевых игр. 🎲\n
 Умею помогать игрокам находить мастеров и организовывать игры в удобном формате! 🧙‍♂️🗺️""")
 
-    @staticmethod   
+    @staticmethod
     async def set_commands(app: Application) -> None:
         commands = [
         BotCommand("start", "Начать"),
@@ -32,7 +32,8 @@ class TRGBot:
         await app.bot.set_my_commands(commands)
 
     def build_bot(self):
-        app = Application.builder().token(self.token).build()
+        persistence = PicklePersistence(filepath=get_settings().persistence_data)
+        app = Application.builder().token(self.token).persistence(persistence).build()
         return app
 
     @staticmethod

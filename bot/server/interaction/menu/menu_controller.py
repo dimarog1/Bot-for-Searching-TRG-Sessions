@@ -1,10 +1,15 @@
 import enum
 
-from telegram import Update, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    Update,
+)
+from telegram.ext import ContextTypes, filters
 
-from bot.exceptions.registration_exceptions import UserNotExistsException
-from bot.server.interaction.menu.menu_service import MenuService
+from bot.server.interaction.conversation_states import ConversationStates
+from bot.server.interaction.profile import ProfileController
 
 
 class MenuStatesEnum(enum.Enum):
@@ -14,109 +19,151 @@ class MenuStatesEnum(enum.Enum):
     MASTER_SEARCH = "Поиск мастеров"
     SETTINGS = "Настройки"
     SUPPORT = "Помощь"
-    EDIT_NAME = "Редактировать имя"
-    EDIT_CITY = "Редактировать город"
-    EDIT_COUNTRY = "Редактировать страну"
 
 
 class MenuController:
+    regex_for_main_menu_listener = filters.Regex(
+        f"^({MenuStatesEnum.MENU.value}|"
+        f"{MenuStatesEnum.PROFILE.value}|"
+        f"{MenuStatesEnum.SESSIONS.value}|"
+        f"{MenuStatesEnum.MASTER_SEARCH.value}|"
+        f"{MenuStatesEnum.SETTINGS.value}|"
+        f"{MenuStatesEnum.SUPPORT.value})$"
+    )
+
     @staticmethod
-    async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, message="Вам доступно меню"):
+    async def show_main_menu(
+        update: Update,
+        context: ContextTypes.DEFAULT_TYPE,
+        message="Вам доступно меню",
+    ):
         keyboard = [
             [
                 MenuStatesEnum.PROFILE.value,
                 MenuStatesEnum.SESSIONS.value,
                 MenuStatesEnum.MASTER_SEARCH.value,
-                MenuStatesEnum.SETTINGS.value
+                MenuStatesEnum.SETTINGS.value,
             ],
-            [
-                MenuStatesEnum.SUPPORT.value
-            ]
+            [MenuStatesEnum.SUPPORT.value],
         ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False)
+        reply_markup = ReplyKeyboardMarkup(
+            keyboard, resize_keyboard=True, one_time_keyboard=False
+        )
 
         await update.message.reply_text(message, reply_markup=reply_markup)
 
     @staticmethod
-    async def main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def main_menu(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
         text = update.message.text
 
         match text:
             case MenuStatesEnum.PROFILE.value:
-                await MenuController.profile(update, context)
+                await ProfileController.profile(update, context)
             case MenuStatesEnum.SESSIONS.value:
-                raise NotImplementedError(f"{MenuStatesEnum.SESSIONS.value} is not implemented yet")
+                await MenuController.sessions(update, context)
             case MenuStatesEnum.MASTER_SEARCH.value:
-                raise NotImplementedError(f"{MenuStatesEnum.MASTER_SEARCH.value} is not implemented yet")
+                raise NotImplementedError(
+                    f"{MenuStatesEnum.MASTER_SEARCH.value} not implemented yet"
+                )
             case MenuStatesEnum.SETTINGS.value:
-                raise NotImplementedError(f"{MenuStatesEnum.SETTINGS.value} is not implemented yet")
+                raise NotImplementedError(
+                    f"{MenuStatesEnum.SETTINGS.value} not implemented yet"
+                )
             case MenuStatesEnum.SUPPORT.value:
                 await MenuController.support(update, context)
 
+        return ConversationStates.MENU
+
     @staticmethod
-    async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def sessions(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
         keyboard = [
-            [InlineKeyboardButton("Редактировать", callback_data="edit_profile")],
+            [
+                InlineKeyboardButton(
+                    "Мои сессии (мастер)", callback_data="sessions:my_master_sessions"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    "Мои сессии (игрок)", callback_data="sessions:my_player_sessions"
+                )
+            ],
+            [InlineKeyboardButton("Поиск", callback_data="sessions:find_sessions")],
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
 
-        tg_id = update.message.from_user.id
-        try:
-            await update.message.reply_text(
-                (await MenuService.get_profile_info(tg_id)),
-                reply_markup=reply_markup,
-                parse_mode="Markdown"
-            )
-        except UserNotExistsException:
-            await update.message.reply_text("Вы не зарегистрированы.\nПожалуйста, воспользуйтесь командой /register")
+        await update.message.reply_text("Выберите действие:", reply_markup=reply_markup)
 
     @staticmethod
     async def support(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("По всем вопросам по боту обращайтесь к Дмитрию (@dimarog1) или Антону (@mureann)")
+        return ConversationStates.MENU
 
     @staticmethod
-    async def handle_inline_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def handle_sessions_inline_buttons(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
         query = update.callback_query
         await query.answer()
 
         match query.data:
-            case "edit_profile":
+            case "sessions:my_master_sessions":
                 keyboard = [
-                    [InlineKeyboardButton("Редактировать имя", callback_data="edit_name")],
-                    [InlineKeyboardButton("Редактировать страну", callback_data="edit_country")],
-                    [InlineKeyboardButton("Редактировать город", callback_data="edit_city")],
+                    [
+                        InlineKeyboardButton(
+                            "Создать новую сессию",
+                            callback_data="sessions:my_master_active_sessions_management_create",
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            "Активные сессии",
+                            callback_data="sessions:my_master_active_sessions",
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            "Законченные сессии",
+                            callback_data="sessions:my_master_ended_sessions",
+                        )
+                    ],
                 ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 await query.edit_message_reply_markup(reply_markup=reply_markup)
-            case "edit_name":
-                await query.message.reply_text("Введите новое имя:")
-                context.user_data['state'] = MenuStatesEnum.EDIT_NAME
-            case "edit_city":
-                await query.message.reply_text("Введите новый город:")
-                context.user_data['state'] = MenuStatesEnum.EDIT_CITY
-            case "edit_country":
-                await query.message.reply_text("Введите новую страну:")
-                context.user_data['state'] = MenuStatesEnum.EDIT_COUNTRY
+            case "sessions:my_master_active_sessions":
+                keyboard = [
+                    [
+                        InlineKeyboardButton(
+                            "Изменить / Удалить",
+                            callback_data="sessions:my_master_active_sessions_management_edit",
+                        )
+                    ],
+                    [
+                        InlineKeyboardButton(
+                            "Показать все сессии",
+                            callback_data="sessions:my_master_active_sessions_all",
+                        )
+                    ],
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                await query.edit_message_reply_markup(reply_markup=reply_markup)
+            case "sessions:my_master_active_sessions_management_edit":
+                raise NotImplementedError("Editing sessions not implemented yet")
+            case "sessions:my_master_active_sessions_management_create":
+                await query.message.reply_text("Во что будем играть?")
+                return ConversationStates.GAME_NAME
+            case _:
+                await query.message.reply_text("Неизвестная команда.")
+                return ConversationStates.MENU
+
+        return ConversationStates.MENU
 
     @staticmethod
-    async def handle_user_response(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        state = context.user_data.get('state')
-        tg_id = update.message.from_user.id
-        text = update.message.text
-
-        answer = "Что-то пошло не так, попробуйте еще раз."
-
-        if state == MenuStatesEnum.EDIT_NAME:
-            await MenuService.set_user_name(tg_id, text)
-            answer = "Имя успешно изменено."
-        elif state == MenuStatesEnum.EDIT_CITY:
-            await MenuService.set_user_city(tg_id, text)
-            answer = "Город успешно изменен."
-        elif state == MenuStatesEnum.EDIT_COUNTRY:
-            await MenuService.set_user_country(tg_id, text)
-            answer = "Страна успешно изменена."
-
-        context.user_data['state'] = None
-
-        await MenuController.show_menu(update, context, message=answer)
-        await MenuController.profile(update, context)
+    async def support(
+        update: Update, context: ContextTypes.DEFAULT_TYPE
+    ) -> ConversationStates:
+        await update.message.reply_text("Напишите нам: @dimarog1 или @mureann")
+        return ConversationStates.MENU

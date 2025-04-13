@@ -1,5 +1,4 @@
 from bot.db.models import User
-
 from bot.server.common_dao.user_dao import UserDao
 
 
@@ -10,10 +9,10 @@ class RegistrationService:
 
     @staticmethod
     async def register_user(
-            tg_id: int,
-            name: str,
-            country: str,
-            city: str,
+        tg_id: int,
+        name: str,
+        country: str,
+        city: str,
     ) -> User:
         user = User(tg_id=tg_id, name=name, country=country, city=city)
 

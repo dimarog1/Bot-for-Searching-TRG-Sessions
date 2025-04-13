@@ -18,6 +18,33 @@ psycopg2-binary = "^2.9.9"
 geopy = "^2.4.1"
 python-telegram-bot-calendar = "^1.0.5"
 
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+isort = "^6.0.1"
+flake8 = "^7.2.0"
+pylint = "^3.3.6"
+mypy = "^1.15.0"
+pre-commit = "^4.2.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | __pycache__
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
